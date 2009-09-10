@@ -149,6 +149,7 @@ osmvc.controllers = ['yourNamespace.HomeController', 'yourNamespace.UsersControl
 
 * ホームビュー、プロフィールビュー、キャンバスビューそれぞれのデフォルトのアクションを設定することができ、その設定に基づき自動でそのアクションメソッドに処理を渡してくれます。
 
+<pre>
 osmvc.defaultActions = {'canvas':  {'controller': 'home',
                                     'action':     'index'},
                         'profile': {'controller': 'home',
@@ -209,7 +210,7 @@ h3. モデル
 * これらのメソッドはgadgets.io.makeRequestを使用し、サーバーサイドのRESTfulなURLに対してリクエストを飛ばし、その結果に応じてモデルクラスのインスタンスを返します。
 
 |メソッド      | リクエストURL   | パラメータ             |
-| find         | GET  /users     | 自由に指定可能         | 
+| find         | GET  /users     | 自由に指定可能         |
 | save(idなし) | POST /users     | モデルのプロパティ情報 |
 | save(idあり) | PUT  /users     | モデルのプロパティ情報 |
 | destroy      | DESTROY  /users | id                     |
@@ -344,7 +345,7 @@ show();
 
 * JavaScriptコードの場合はevalで実行されます。
 * osmvc.ActionVidewは、JST内で、osmvc.linkToメソッドを使用できるようにします。
-* linkToは、<a>タグを生成し、それがクリックされた際に実行されるアクションメソッドやそこに渡すパラメータを指定できます。
+* linkToは、＜a＞タグを生成し、それがクリックされた際に実行されるアクションメソッドやそこに渡すパラメータを指定できます。
 
 * views/users/index.html.jst
 
@@ -441,8 +442,4 @@ h2. ライセンス
 h2. 作者
 
 * Yuki SHIDA (shid@ark-web.jp)
-
-
-
-
 
