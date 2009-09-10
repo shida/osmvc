@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Furpeace">
+    <Require feature="opensocial-0.8" />
+    <Require feature="views" />
+    <Optional feature="content-rewrite">
+      <Param name="include-urls"></Param>
+      <Param name="exclude-urls">.*</Param>
+      <Param name="include-tags"></Param>
+    </Optional>
+  </ModulePrefs>
+  <Content view="profile,home,canvas">
+    <![CDATA[
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/lib/jquery.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/lib/jsdeferred.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/lib/trimpath-template.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/lib/action_controller.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/lib/active_record.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/lib/action_view.js"></script>
+
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/config/environment.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/controllers/home_controller.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/controllers/pets_controller.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/models/dog.js"></script>
+      <script type="text/javascript" src="http://furpeace.ark-web.jp/opensocial/javascripts/models/user.js"></script>
+
+      <div id='contents'></div>
+    ]]>
+  </Content>
+</Module>

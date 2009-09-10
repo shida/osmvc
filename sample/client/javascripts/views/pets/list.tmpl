@@ -1,0 +1,15 @@
+<h2>ペット一覧</h2>
+
+<ul>
+{for pet in pets}
+<li>${pet.name}
+  <ul>
+    <li>${% osmvc.linkTo('詳細', {controller: 'pets', action: 'show', id: pet.id}) %}</li>
+    <li>${% osmvc.linkTo('修正', {controller: 'pets', action: 'edit', id: pet.id}) %}</li>
+    <li>${% osmvc.linkTo('削除', {controller: 'pets', action: 'destroy', id: pet.id}) %}</li>
+  </ul>
+</li>
+{/for}
+</ul>
+
+<li>${% osmvc.linkTo('追加', {controller: 'pets', action: 'add'}) %}</li>

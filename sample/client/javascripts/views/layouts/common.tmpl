@@ -1,0 +1,18 @@
+<div class="header">
+ロゴ<br />
+
+こんにちは${viewer.getDisplayName()}さん!<br />
+
+<ul>
+<li>${% osmvc.linkTo('ホームだよん', {controller: 'home', action: 'index'}) %}</li>
+<li>${% osmvc.linkTo('ペット一覧', {controller: 'pets', action: 'list'}) %}</li>
+<li>${% osmvc.linkTo('ペットのつぶやき一覧', {controller: 'pets_statuses', action: 'list'}) %}</li>
+<li>${% osmvc.linkTo('全犬のつぶやき一覧', {controller: 'dogs_statuses', action: 'list'}) %}</li>
+</ul>
+</div>
+
+<hr>
+<div class="main">
+
+${main}
+</div>
