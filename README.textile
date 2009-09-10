@@ -1,4 +1,4 @@
-h1. osmvcとは?
+h1. osmvcとは? 
 
 * 以下の内容はまだ作成途中のライブラリに関するもので、動作していないものも多数です。(とりあえずサンプルは作るのはまだこれから)
 * osmvcはOpenSocial JavaScript APIを使ったOpenSocialアプリケーション開発のためのMVCフレームワークです。
