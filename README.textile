@@ -1,0 +1,448 @@
+h1. osmvcとは?
+
+* 以下の内容はまだ作成途中のライブラリに関するもので、動作していないものも多数です。(とりあえずサンプルは作るのはまだこれから)
+* osmvcはOpenSocial JavaScript APIを使ったOpenSocialアプリケーション開発のためのMVCフレームワークです。
+* Ruby on Railsの設計を参考にして作られています。
+* jQueryを使用しています。
+* JSDeferredを使用し、OpenSocial JavaScript APIを直列的に実行します。
+* Trimpath Template(別名: JavaScript Template、略称 JST、以後JSTと呼称)を使用し、JavaScriptとHTMLコードを分離できます。
+
+
+h2. 使い方
+
+h3. ファイル構造
+
+<pre>
+ gadgets.xml
+ javascripts/
+   +- controllers/
+        +- application.js
+        +- home_controller.js
+        +- users_controller.js
+   +- views/
+        +- layouts/
+        +- home/
+             +- index.html.tmpl
+        +- users/
+             +- add.html.tmpl
+             +- edit.html.tmpl
+   +- models/
+        +- user.js
+</pre>
+
+h3. ガジェットXMLの作成
+
+* ガジェットXMLのContentに次のように記述します。(「BASE_URL」の部分は、http://opensocial.ark-web.jp/osmvc/sample/client/javascriptsなどに置き換えてください。)
+
+<pre>
+  <Content view="profile,home,canvas">
+    <![CDATA[
+      <!-- 依存するライブラリ --> 
+      <script type="text/javascript" src="BASE_URL/lib/jquery.js"></script>
+      <script type="text/javascript" src="BASE_URL/lib/jsdeferred.js"></script>
+      <script type="text/javascript" src="BASE_URL/lib/trimpath-template.js"></script>
+      <!-- osmvc本体 --> 
+      <script type="text/javascript" src="BASE_URL/lib/osmvc/action_controller.js"></script>
+      <script type="text/javascript" src="BASE_URL/lib/osmvc/active_record.js"></script>
+      <script type="text/javascript" src="BASE_URL/lib/osmvc/action_view.js"></script>
+
+      <!-- 作成するコントローラーとモデル --> 
+      <script type="text/javascript" src="BASE_URL/config/environment.js"></script>
+      <script type="text/javascript" src="BASE_URL/controllers/home_controller.js"></script>
+      <script type="text/javascript" src="BASE_URL/controllers/users_controller.js"></script>
+      <script type="text/javascript" src="BASE_URL/models/user.js"></script>
+      <div id='contents'></div>
+    ]]>
+  </Content>
+</Module>
+</pre>
+
+h3. コントローラーの作成
+
+* コントローラーはosmvc.ActionControllerクラスを継承して作ります
+* まず、コントローラーに共通の実装を記述する「ApplicatoinController」を用意します。
+
+<pre>
+var yourNamespace  = new Object();
+
+// コンストラクタ
+yourNamespace.ApplicationController = function() {
+}
+
+$.extend(yourNamespace.ApplicationController, osmvc.ActionController, {
+
+    // クラス変数
+    // クラスメソッド
+});
+
+$.extend(yourNamespace.ApplicationController.prototype, osmvc.ActionController.prototype, {
+
+    // インスタンス変数
+    // インスタンスメソッド(アクションメソッド、beforeフィルタなど)
+});
+</pre>
+
+* ApplicationControllerを継承する個々のコントローラーを用意します。
+
+<pre>
+var yourNamespace  = new Object();
+
+// コンストラクタ
+yourNamespace.HomeController = function() {
+}
+
+$.extend(yourNamespace.HomeController, osmvc.ApplicationController, {
+
+    // クラス変数
+    // クラスメソッド
+});
+
+$.extend(yourNamespace.HomeController.prototype, osmvc.ApplicationController.prototype, {
+
+    // インスタンス変数
+    // インスタンスメソッド(アクションメソッド、beforeフィルタなど)
+});
+</pre>
+
+h3. モデルの作成
+
+* モデルはosmvc.ActiveRecordクラスを継承して作ります
+
+<pre>
+yourNamespace.User = function(attr) {
+    this.id   = attr['id'];
+    this.name = attr['name'];
+}
+
+$.extend(yourNamespace.User, osmvc.ActiveRecord, {
+
+    // クラス変数
+    // クラスメソッド
+})
+
+$.extend(yourNamespace.User.prototype, osmvc.ActiveRecord.prototype, {
+
+    // インスタンス変数
+    // インスタンスメソッド
+});
+
+</pre>
+
+h3. ビューの作成
+
+* ビューは、Trimpath Template(別名: JavaScript Template、略称 JST、以後JSTと呼称)のテンプレートファイルとして作ります。
+
+<pre>
+こんにちは${user.getDisplayName()}さん
+
+あなたの好きな食べ物言語は、${user.food}です。
+</pre>
+
+h3. 設定ファイルの作成
+
+* 設定ファイルを「config/environment.js」として用意します。
+* コントローラー名を記述し、フレームワークに動的にロードさせます。
+
+<pre>
+osmvc.controllers = ['yourNamespace.HomeController', 'yourNamespace.UsersController'];
+</pre>
+
+* ホームビュー、プロフィールビュー、キャンバスビューそれぞれのデフォルトのアクションを設定することができ、その設定に基づき自動でそのアクションメソッドに処理を渡してくれます。
+
+osmvc.defaultActions = {'canvas':  {'controller': 'home',
+                                    'action':     'index'},
+                        'profile': {'controller': 'home',
+                                    'action':     'index'},
+                        'home':    {'controller': 'home',
+                                    'action':     'index'}};
+</pre>
+
+* その他、「osmvc.apiBaseUrl」、「osmvc.templateBaseUrl」を指定する必要がありますが、後述します。
+
+h3. コントローラー
+
+* アクションメソッドにはbeforeフィルタが設定できます。
+* HomeControllerのインスタンス変数として下記を記述します。
+
+<pre>
+$.extend(furpeace.HomeController.prototype, osmvc.ActionController.prototype, {
+    before: {'index': ['loadViewer',
+                       'checkUserExists']},
+    // アクションメソッド
+    index: function() {
+    },
+
+    // beforeフィルタ
+    loadViewer: function() {
+    },
+
+    checkUserExists: function() {
+    }
+}
+</pre>
+
+* これでHomeController#indexアクションの前に、「HomeController#loadViewer」、「HomeController#checkUserExists」が順番に実行されます。
+* 各beforeフィルタが「return false」すると、それで処理が終了します。
+
+h4. JSDeferredを使った直列的なモデルの利用
+
+* beforeフィルタ、アクションメソッドは、JSDeferredの文脈で呼び出されます。
+* beforeフィルタ、アクションメソッド内ではモデルクラスを使ってビジネスロジックを実行させます。
+* モデルクラスでは多くのOpenSocial JavaScript APIが使用されます。
+* モデルクラスもDeferredの文脈で実行することで、OpenSocial APIを直列的に実行させることができます。
+
+<pre>
+    list: function() {
+        var me = this;
+        return Deferred.next(function() {
+            return yourNamespace.User.find();
+        }).next(function(users) {
+            me.users = users;
+        });
+    }
+</pre>
+
+
+h3. モデル
+
+* モデルクラスではfind(), save(), destroy()メソッドが使用できます。
+* これらのメソッドはgadgets.io.makeRequestを使用し、サーバーサイドのRESTfulなURLに対してリクエストを飛ばし、その結果に応じてモデルクラスのインスタンスを返します。
+
+|メソッド      | リクエストURL   | パラメータ             |
+| find         | GET  /users     | 自由に指定可能         | 
+| save(idなし) | POST /users     | モデルのプロパティ情報 |
+| save(idあり) | PUT  /users     | モデルのプロパティ情報 |
+| destroy      | DESTROY  /users | id                     |
+
+* リクエストURLのBASE_URLをenvironment.jsと、モデルクラスのクラス変数の両方で規定します。
+
+* config/environment.js
+
+<pre>
+osmvc.apiBaseUrl = 'http://opensocial.ark-web.jp/osmvc/sample/server';
+</pre>
+
+* models/user.js
+
+<pre>
+$.extend(yourNamespace.User, osmvc.ActiveRecord, {
+    apiBaseUrl: osmvc.apiBaseUrl + '/users',
+    ...
+}
+</pre>
+
+* makeRequestは現状は、「SIGNED」方式(http://wiki.opensocial.org/index.php?title=Gadgets.io_%28v0.8%29#Signed_authorization)で送信されます。(OAuth形式は未対応)
+* サーバーサイドプログラムは、データベースに対して、SELECT、INSERT、UPDATE、DELETEなどの処理を行い、下記フォーマットのJSONを返します。
+
+* GET
+
+<pre>
+ {'status' => 'success',
+  'result' => [{id: 1, name: 'Yuki SHIDA'}, {id: 2, name: 'Taro Yamada'}]}
+</pre>
+
+* POST
+
+<pre>
+ {'status' => 'success',
+  'result' => {id: 1, name: 'Yuki SHIDA'}}
+</pre>
+
+* PUT
+
+<pre>
+ {'status' => 'success',
+  'result' => {id: 1, name: 'Yuki SHIDA'}}
+</pre>
+
+* DESTROY
+
+<pre>
+ {'status' => 'success',
+  'result' => {}}
+</pre>
+
+* find()でインスタンスを生成するために、モデル内にクラス名を明記する必要があります(ここなんとかしたいが)。
+
+<pre>
+$.extend(yourNamespace.User, osmvc.ActiveRecord, {
+    className: 'yourNamespace.User',
+    ...
+</pre>
+
+
+h3. ビュー
+
+* コントローラーの処理が終わると、実行していたコントローラー、アクションにしたがって、テンプレートのURLが決定されます。
+** 例: HomeController#index -> http://opensocial.ark-web.jp/sample/client/javascripts/views/home/index.html.jst
+* テンプレートファイルは、そのURLからgadgets.io.makeRequstによって動的に取得されます。
+* URLのBASE_URLをconfig/environment.jsに記述します。
+
+<pre>
+osmvc.templateBaseUrl = 'http://opensocial.ark-web.jp/osmvc/sample/javascripts/views';
+</pre>
+
+* 一度サーバーから取得したテンプレートはメモリに保持されます。
+* テンプレート内ではコントローラーのインスタンス変数がそのままJSTで使用できます(Rails風にモデルのインスタンスを入れておくとよいと思います)。
+
+* controllers/home_controller.js
+
+<pre>
+    index: function() {
+        var me = this;
+        return Deferred.next(function() {
+            // URL #{yourNamespace.User.apiBaseUrl}?load_by_viewer_id=true にリクエストが飛びます
+            return yourNamespace.User.find({load_by_viewer_id: true});
+        }).next(function(user) {
+            me.user = user;
+        });
+    },
+</pre>
+
+* views/home/index.html.tmpl
+
+<pre>
+あなたの好きな食べ物は、${user.food}です。
+</pre>
+
+* JST内にはHTMLまたはJavaScriptコードを記述します。デフォルトではHTMLです。
+* HTMLの場合のファイル名、xxx.html.jst、JSの場合の拡張子は、xxx.js.jstです。
+* HTMLの場合、JSTで処理された後のHTMLで、gadgets.xml内の <div id='contents'></div>の中身が置き換わります。
+
+* views/home/index.html.tmpl
+
+<pre>
+あなたの好きな食べ物は、${user.food}です。
+</pre>
+
+* layoutを利用できます。デフォルトではcommonです。${main}部分に、各アクションの内容が入ります。
+* views/layout/common.html.tmpl
+
+<pre>
+こんにちは${viewer.getDisplayName()}さん!<br />
+
+${main}
+</pre>
+
+* JavaScriptコードの場合はアクションメソッド内で指定します。
+
+* controllers/users_controller.js
+
+<pre>
+    confirmDestroy: function() {
+        this.templateType = 'javascript'
+    }
+</pre>
+
+* views/users/confirm_destroy.js.jst
+
+<pre>
+  $('destroyConfirm').html = '${% osmvc.linkTo('本当に削除しますか', {controller: 'users', action: 'destroy', id: ${params['id']}}) %}'
+show();
+  $('destroyConfirm').show();
+</pre>
+
+* JavaScriptコードの場合はevalで実行されます。
+* osmvc.ActionVidewは、JST内で、osmvc.linkToメソッドを使用できるようにします。
+* linkToは、<a>タグを生成し、それがクリックされた際に実行されるアクションメソッドやそこに渡すパラメータを指定できます。
+
+* views/users/index.html.jst
+
+<pre>
+<ul>
+<li>${% osmvc.linkTo('詳細', {controller: 'users', action: 'show', id: user.id}) %}</li>
+</ul>
+</pre>
+
+* linkToの第2引数には、遷移先のアクションを指定します。この際、CamelCaseではなくSnakeCaseを使うことに注意してください。
+* 第3引数は、railsのlik_toのhtml_option的に指定します。
+
+h3. 再びコントローラー
+
+* LinkToの第2引数に、controller, action以外のパラメータを指定すると、遷移先のコントローラインスタンスの、「params」に設定されます。
+
+<pre>
+    show: function() {
+        var me = this;
+        return Deferred.next(function() {
+            return yourNamespace.User.find(me.params['id']);
+        }).next(function(pet) {
+            me.user = user;
+        });
+    },
+</pre>
+
+* HTMLコードが描画された後に、実行したい処理をコントローラー内で指定できます。ここに新しく用意されたHTMLに対するイベントハンドラの設定などを書きます。
+
+<pre>
+    add: function() {
+        var me = this;
+        this.afterRender = function() {
+            me.bind($('#formCreate'),
+                    'submit',
+                    {controller: 'users',
+                     action:     'create'});
+        }
+    }
+</pre>
+
+* イベントハンドラの設定は、ActionControllerから継承されるbindを使用します。
+** 第一引数: jQueryオブジェクト
+** 第二引数: イベント名
+** 第三引数: イベントを処理するアクション(ここでもSnakeCase指定)
+* これにより、clickなどのイベントもJSDeferredの文脈でアクションメソッドで実行できます。
+
+* コントローラーではredirectToを利用することができます。
+
+<pre>
+    return me.redirectTo({controller: 'home', 
+                          action:     'index',
+                          id:          params['id']);
+</pre>
+
+
+h3. エラー処理
+
+* アクションはJSDeferredの文脈で実行されます。
+* この文脈で例外をthrowすると、ActionController#processErrorで処理されます。
+* 途中で、JSDefferredのerror()で、catchして処理するか、
+
+<pre>
+    return Deferred.next(function() {
+        return yourNamespace.user.create(params);
+    }).next(function(user) {
+        return me.redirectTo('home', 'index');
+    }).error(function() {
+        // なにかエラー処理
+    })
+</pre>
+
+* またはApplicationControllerでオーバーライドして共通のエラー処理を実装してください。
+
+<pre>
+$.extend(yourNamespace.ApplicationController.prototype, osmvc.ActionController.prototype, {
+    processError: function() {
+        // なにかエラー処理
+    }
+}
+</pre>
+
+h2. 謝辞
+
+* Ruby on Railsを開発しているDHHさん及び開発コミュニティの皆様に感謝します。
+* jQueryを開発しているJohn Resigさん及びjQuery開発コミュニティの皆様に感謝します。
+* JSDeferredを開発しているcho45さんに感謝します。
+* Trimpath Templateを開発しているSteve Yenさんに感謝します。
+
+h2. ライセンス
+
+* MIT License
+
+h2. 作者
+
+* Yuki SHIDA (shid@ark-web.jp)
+
+
+
+
+
